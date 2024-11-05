@@ -2,10 +2,13 @@ package com.example.assignment2ahmedjava;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import android.widget.Button;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,6 +40,42 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.addbtn).setOnClickListener(v -> add_Loc());
         findViewById(R.id.deletebtn).setOnClickListener(v -> delete_Loc());
     }
+
+    private String normalizeAddress(String address){
+         Map<String, String> shortform = new HashMap<>();
+        shortform.put("rd", "road");
+        shortform.put("st", "street");
+        shortform.put("ave", "avenue");
+        shortform.put("blvd", "boulevard");
+        shortform.put("dr", "drive");
+        shortform.put("ln", "lane");
+        shortform.put("ct", "court");
+        shortform.put("pl", "place");
+        shortform.put("sq", "square");
+        shortform.put("cres", "crescent");
+        shortform.put("pkwy", "parkway");
+        shortform.put("hwy", "highway");
+        shortform.put("terr", "terrace");
+        shortform.put("way", "way");
+        shortform.put("cir", "circle");
+        shortform.put("N", "North");
+        shortform.put("S", "South");
+        shortform.put("E", "East");
+        shortform.put("W", "West");
+        shortform.put("NE", "Northeast");
+        shortform.put("NW", "Northwest");
+        shortform.put("SE", "Southeast");
+        shortform.put("SW", "Southwest");
+        String normalized = address;
+        for(String key : shortform.keySet()){
+            normalized = normalized.replaceAll("(?i)\\b" + key + "\\b", shortform.get(key));
+        }
+        Log.d("MyDebug", normalized);
+        return normalized;
+    }
+
+
+
     // method for updating a location that already exists
     public void update_Loc() {
         //check if any of the required inputs are missing
@@ -45,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         //get id,address,latitude,longitude from user and update
         int id = Integer.parseInt(getText(ID));
         String address = getText(Address);
+        address =  normalizeAddress(address);
         float latitude = Float.parseFloat(getText(Latitude));
         float longitude = Float.parseFloat(getText(Longitude));
         boolean isUpdated = dbHelper.update_data(id, address, longitude, latitude);
@@ -57,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         if (isFieldEmpty(Address, Latitude, Longitude)) return;
         //get address,longitude,latitude from user
         String address = getText(Address);
+        address = normalizeAddress(address);
         float longitude = Float.parseFloat(getText(Longitude));
         float latitude = Float.parseFloat(getText(Latitude));
 
@@ -71,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         //get address from user and check if its in database
         String address = getText(Address);
+        address = normalizeAddress(address);
         Cursor cursor = dbHelper.getData(address);
         // if location exists, show it
         if (cursor != null && cursor.moveToFirst()) {
